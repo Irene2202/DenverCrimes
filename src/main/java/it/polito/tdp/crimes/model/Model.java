@@ -37,7 +37,7 @@ public class Model {
 		}
 		
 		System.out.println("#Vertici: "+grafo.vertexSet().size());
-		System.out.println("#Vertici: "+grafo.edgeSet().size());
+		System.out.println("#Archi: "+grafo.edgeSet().size());
 
 	}
 	

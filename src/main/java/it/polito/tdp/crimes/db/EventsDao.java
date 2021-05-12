@@ -81,8 +81,8 @@ public class EventsDao {
 	
 	public List<String> getVertici(String categoria, int mese){
 		String sql="SELECT DISTINCT offense_type_id "
-				+"FROM events "
-				+"WHERE offens_category_id=? AND Month(reported_date)=?";
+				+"FROM EVENTS "
+				+"WHERE offense_category_id=? AND Month(reported_date)=?";
 		
 		List<String> result=new ArrayList<>();
 		
