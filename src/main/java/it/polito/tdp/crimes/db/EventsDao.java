@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+import it.polito.tdp.crimes.model.Arco;
 import it.polito.tdp.crimes.model.Event;
 
 
@@ -52,6 +55,84 @@ public class EventsDao {
 			e.printStackTrace();
 			return null ;
 		}
+	}
+	
+	public List<String> getCategorie(){
+		String sql="SELECT DISTINCT offense_category_id FROM events";
+		
+		List<String> result=new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			ResultSet rs=st.executeQuery();
+			
+			while(rs.next()) {
+				result.add(rs.getString("offense_category_id"));
+			}
+			
+			conn.close();
+			
+			
+		}catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return result;
+	}
+	
+	public List<String> getVertici(String categoria, int mese){
+		String sql="SELECT DISTINCT offense_type_id "
+				+"FROM events "
+				+"WHERE offens_category_id=? AND Month(reported_date)=?";
+		
+		List<String> result=new ArrayList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setString(1, categoria);
+			st.setInt(2, mese);
+			ResultSet rs=st.executeQuery();
+			
+			while(rs.next()) {
+				result.add(rs.getString("offense_type_id"));
+			}
+			
+			conn.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+	public List<Arco> getArchi(String categoria, int mese) {
+		String sql="SELECT e1.offense_type_id AS v1, e2.offense_type_id AS v2, COUNT(DISTINCT e1.neighborhood_id) AS peso " 
+				+"FROM EVENTS e1, EVENTS e2 "
+				+"WHERE e1.offense_category_id=? AND e2.offense_category_id=e1.offense_category_id "
+					+"AND MONTH(e1.reported_date)=? AND MONTH(e2.reported_date)=MONTH(e1.reported_date) "
+					+"AND e1.offense_type_id>e2.offense_type_id AND e1.neighborhood_id=e2.neighborhood_id "
+				+"GROUP BY e1.offense_type_id, e2.offense_type_id";
+		
+		List<Arco> result=new ArrayList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setString(1, categoria);
+			st.setInt(2, mese);
+			ResultSet rs=st.executeQuery();
+			
+			while(rs.next()) {
+				result.add(new Arco(rs.getString("v1"), rs.getString("v2"), rs.getInt("peso")));
+			}
+			
+			conn.close();
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 }
